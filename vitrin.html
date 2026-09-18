@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Arxeologiya">
+
+    <title>Archaeology Section Audio Guide / Arxeologiya Bölməsi</title>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WF2527NXYS"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-WF2527NXYS');
+    </script>
+
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-muted: #666666;
+            --border-color: #dddddd;
+            --accent-az: #0056b3;
+            --accent-en: #b30000;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+        }
+
+        .screen {
+            background: var(--card-bg);
+            padding: 30px 25px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            display: none;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+
+        .screen.active {
+            display: flex;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .welcome-icon { font-size: 50px; margin-bottom: 10px; }
+        .welcome-title { font-size: 22px; font-weight: bold; color: var(--text-main); margin-bottom: 5px; }
+        .welcome-desc { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 25px; }
+
+        .btn-lang {
+            color: white;
+            border: none;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        .btn-lang:active { opacity: 0.8; }
+        .btn-az { background: var(--accent-az); }
+        .btn-en { background: var(--accent-en); margin-bottom: 5px; }
+
+        .museum-name { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; font-weight: bold; }
+        .track-title { font-size: 24px; font-weight: bold; color: var(--text-main); min-height: 60px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+
+        audio { width: 100%; margin-top: 5px; outline: none; }
+
+        .error-box {
+            background: #fdecea;
+            color: #b30000;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+            border: 1px solid #f5c2c0;
+        }
+
+        .global-footer {
+            position: absolute;
+            bottom: 15px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 11px;
+            color: #888;
+            line-height: 1.6;
+            padding: 0 20px;
+        }
+        .global-footer span { font-weight: bold; color: #555; }
+    </style>
+</head>
+<body>
+
+    <div id="welcome-screen" class="screen active">
+        <div class="welcome-icon">🏺</div>
+        <div class="welcome-title">Xoş Gəlmisiniz / Welcome</div>
+        <div class="welcome-desc">Zəhmət olmasa dil seçin. Tam ekran rejimi aktivləşəcək.<br>Please select a language. Full screen mode will activate.</div>
+
+        <div id="ios-prompt" style="display: none; background: #fff3cd; color: #856404; padding: 12px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; border: 1px solid #ffeeba; text-align: left; line-height: 1.5;">
+            📱 <strong>iPhone istifadəçiləri / iPhone users:</strong><br>
+            Daha yaxşı təcrübə üçün aşağıdakı 'Share' (Paylaş) düyməsini sıxaraq <strong>'Add to Home Screen'</strong> (Ana ekrana əlavə et) seçimini edin.<br>
+            <hr style="border: 0; border-top: 1px solid #ffeeba; margin: 8px 0;">
+            For a full-screen experience, tap the 'Share' button below and select <strong>'Add to Home Screen'</strong>.
+        </div>
+
+        <button class="btn-lang btn-az" onclick="startApp('az')">🇦🇿 Azərbaycan</button>
+        <button class="btn-lang btn-en" onclick="startApp('en')">🇬🇧 English</button>
+    </div>
+
+    <div id="player-screen" class="screen">
+        <div class="museum-name" id="ui-museum-name"></div>
+        <div id="display-title" class="track-title"></div>
+
+        <audio id="main-player" controls>
+            <source id="audio-source" src="" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+
+    <div id="error-screen" class="screen">
+        <div class="welcome-icon">⚠️</div>
+        <div class="error-box" id="error-text"></div>
+    </div>
+
+    <div class="global-footer" id="ui-footer"></div>
+
+    <script>
+        window.onload = function() {
+            let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            let isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+
+            if (isIOS && !isStandalone) {
+                document.getElementById('ios-prompt').style.display = 'block';
+            }
+        };
+
+        // VİTRİN VERİLƏNLƏR BAZASI
+        // Hər vitrin üçün: açar söz (URL parametrində istifadə olunur), Az/En başlıq və audio fayl adı.
+        // Yeni vitrin əlavə etmək üçün bu siyahıya bir sətir əlavə etmək kifayətdir.
+        const vitrineData = {
+            paleolit: {
+                az: { title: "Paleolit dövrü", file: "az_paleolit.mp3" },
+                en: { title: "Paleolithic Period", file: "en_paleolithic.mp3" }
+            },
+            mezolit: {
+                az: { title: "Mezolit dövrü", file: "az_mezolit.mp3" },
+                en: { title: "Mesolithic Period", file: "en_mesolithic.mp3" }
+            },
+            neolit: {
+                az: { title: "Neolit dövrü", file: "az_neolit.mp3" },
+                en: { title: "Neolithic Period", file: "en_neolithic.mp3" }
+            },
+            eneolit: {
+                az: { title: "Eneolit dövrü", file: "az_eneolit.mp3" },
+                en: { title: "Eneolithic Period", file: "en_eneolithic.mp3" }
+            },
+            tuncdovru: {
+                az: { title: "Tunc dövrü", file: "az_tuncdovru.mp3" },
+                en: { title: "Bronze Age", file: "en_bronzeage.mp3" }
+            },
+            demirdovru: {
+                az: { title: "Dəmir dövrü", file: "az_demirdovru.mp3" },
+                en: { title: "Iron Age", file: "en_ironage.mp3" }
+            }
+        };
+
+        const uiText = {
+            az: {
+                museumName: "Milli Azərbaycan Tarixi Muzeyi — Arxeologiya Zalı",
+                footer: "© Bütün hüquqlar Milli Azərbaycan Tarixi Muzeyinə aiddir.<br><span>Audio bələdçi Beta versiyadadır.</span> Məzmun süni intellekt tərəfindən səsləndirilmişdir.",
+                errorNoParam: "Bu vitrinə aid QR kod düzgün konfiqurasiya edilməyib. Zəhmət olmasa muzey işçisinə müraciət edin.",
+                errorUnknown: "Bu vitrin üçün audio məlumat tapılmadı."
+            },
+            en: {
+                museumName: "National Museum of History of Azerbaijan — Archaeology Hall",
+                footer: "© All rights reserved to the National Museum of History of Azerbaijan.<br><span>Audio guide is in Beta.</span> Content is voiced by Artificial Intelligence.",
+                errorNoParam: "This display case's QR code is not configured correctly. Please contact museum staff.",
+                errorUnknown: "No audio content was found for this display case."
+            }
+        };
+
+        // URL-dən vitrin açarını oxu, məs: index.html?vitrin=paleolit
+        function getVitrineKey() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('vitrin');
+        }
+
+        const player = document.getElementById('main-player');
+        const source = document.getElementById('audio-source');
+        const titleDisplay = document.getElementById('display-title');
+
+        function startApp(lang) {
+            let elem = document.documentElement;
+            let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+            if (!isIOS) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen().catch(e => console.log(e));
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen().catch(e => console.log(e));
+                }
+            }
+
+            document.getElementById('ui-footer').innerHTML = uiText[lang].footer;
+
+            const key = getVitrineKey();
+
+            if (!key) {
+                showError(lang, uiText[lang].errorNoParam);
+                return;
+            }
+
+            const vitrine = vitrineData[key];
+
+            if (!vitrine) {
+                showError(lang, uiText[lang].errorUnknown);
+                return;
+            }
+
+            document.getElementById('ui-museum-name').innerHTML = uiText[lang].museumName;
+            titleDisplay.innerText = vitrine[lang].title;
+            source.src = vitrine[lang].file;
+            player.load();
+            player.play().catch(e => console.log("Avtomatik oxutma bloklandı"));
+
+            document.getElementById('welcome-screen').classList.remove('active');
+            document.getElementById('player-screen').classList.add('active');
+
+            if (typeof gtag === 'function') {
+                gtag('event', 'vitrine_audio_start', {
+                    'event_category': 'Audio Guide - Archaeology',
+                    'event_label': key + ' (' + lang + ')'
+                });
+            }
+        }
+
+        function showError(lang, message) {
+            document.getElementById('error-text').innerText = message;
+            document.getElementById('welcome-screen').classList.remove('active');
+            document.getElementById('error-screen').classList.add('active');
+        }
+
+        player.onplay = function() {
+            if (typeof gtag === 'function') {
+                gtag('event', 'audio_play', {
+                    'event_category': 'Audio Guide - Archaeology',
+                    'event_label': titleDisplay.innerText
+                });
+            }
+        };
+    </script>
+
+</body>
+</html>
