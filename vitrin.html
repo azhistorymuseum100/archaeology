@@ -363,30 +363,14 @@
         // quiz sahəsi hazırda "null" saxlanılıb — kurator tərəfindən konkret sual/cavab
         // yazılana qədər bilik testi bölməsi həmin vitrində görünməyəcək.
         const vitrineData = {
-    mustye: {
+            mustye: {
                 az: { title: "Mustye mədəniyyəti", file: "az_mustye.mp3" },
                 en: { title: "Mousterian culture", file: "en_mustye.mp3" }
             },
-            mezolit: {
-                az: { title: "Mezolit dövrü", file: "az_mezolit.mp3", quiz: null },
-                en: { title: "Mesolithic Period", file: "en_mesolithic.mp3", quiz: null }
+            quruchay: {
+                az: { title: "Quruçay arxeoloji mədəniyyəti", file: "az_quruchay.mp3" },
+                en: { title: "Guruchay archaeological culture", file: "en_quruchay.mp3" }
             },
-            neolit: {
-                az: { title: "Neolit dövrü", file: "az_neolit.mp3", quiz: null },
-                en: { title: "Neolithic Period", file: "en_neolithic.mp3", quiz: null }
-            },
-            eneolit: {
-                az: { title: "Eneolit dövrü", file: "az_eneolit.mp3", quiz: null },
-                en: { title: "Eneolithic Period", file: "en_eneolithic.mp3", quiz: null }
-            },
-            tuncdovru: {
-                az: { title: "Tunc dövrü", file: "az_tuncdovru.mp3", quiz: null },
-                en: { title: "Bronze Age", file: "en_bronzeage.mp3", quiz: null }
-            },
-            demirdovru: {
-                az: { title: "Dəmir dövrü", file: "az_demirdovru.mp3", quiz: null },
-                en: { title: "Iron Age", file: "en_ironage.mp3", quiz: null }
-            }
         };
         const TOTAL_VITRINES = Object.keys(vitrineData).length;
         const PASSPORT_KEY = 'matm_arxeologiya_passport';
