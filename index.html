@@ -69,7 +69,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- Loqo placeholder --- */
         .logo-placeholder {
             width: 100%;
             max-width: 100px;
@@ -111,9 +110,8 @@
         }
 
         .museum-name { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; font-weight: bold; }
-        .track-title { font-size: 24px; font-weight: bold; color: var(--text-main); min-height: 50px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+        .track-title { font-size: 22px; font-weight: bold; color: var(--text-main); min-height: 50px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
 
-        /* --- Foto/illüstrasiya placeholder --- */
         .photo-placeholder {
             width: 100%;
             aspect-ratio: 16 / 9;
@@ -132,7 +130,6 @@
         }
         .photo-placeholder.visible { display: flex; }
 
-        /* --- Pasport / irəliləyiş --- */
         .progress-badge {
             font-size: 12px;
             color: var(--text-muted);
@@ -144,7 +141,11 @@
             font-weight: bold;
         }
 
-        /* --- Səs dalğası animasiyası --- */
+        .selector-container { margin-bottom: 18px; text-align: left; }
+        label { font-size: 13px; color: var(--text-muted); margin-left: 5px; font-weight: bold; }
+        select { width: 100%; padding: 14px; margin-top: 8px; border-radius: 10px; border: 1px solid var(--border-color); background: #fafafa; font-size: 16px; color: var(--text-main); cursor: pointer; outline: none; }
+        select:focus { border-color: var(--accent-az); }
+
         .player-wrap {
             position: relative;
             width: 100%;
@@ -212,7 +213,6 @@
             border-radius: 3px;
         }
 
-        /* --- Rəy (👍/👎) --- */
         .feedback-box { margin-top: 4px; }
         .feedback-question { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
         .feedback-buttons { display: flex; gap: 12px; justify-content: center; }
@@ -229,7 +229,6 @@
         .feedback-btn.selected { background: #e6f0ff; border-color: var(--accent-az); }
         .feedback-thanks { font-size: 13px; color: #1a7d34; font-weight: bold; margin-top: 8px; display: none; }
 
-        /* --- Bilik testi --- */
         .quiz-box {
             margin-top: 18px;
             padding-top: 18px;
@@ -254,17 +253,6 @@
         .quiz-option.correct { background: #e2f7e6; border-color: #1a7d34; }
         .quiz-option.wrong { background: #fdecea; border-color: #b30000; }
 
-        .error-box {
-            background: #fdecea;
-            color: #b30000;
-            padding: 16px;
-            border-radius: 10px;
-            font-size: 14px;
-            line-height: 1.5;
-            border: 1px solid #f5c2c0;
-        }
-
-        /* --- Pasport tamamlanma overlay --- */
         .overlay {
             position: fixed;
             inset: 0;
@@ -325,7 +313,7 @@
 <body>
 
     <div id="welcome-screen" class="screen active">
-        <div class="logo-placeholder">MATM LOQOSU / LOGO</div>
+        <img src="logo.png" alt="MATM" style="max-width:100px; height:auto; margin:0 auto 18px auto; display:block;">
         <div class="welcome-icon">🏺</div>
         <div class="welcome-title">Xoş Gəlmisiniz / Welcome</div>
         <div class="welcome-desc">Dil seçin / Select language</div>
@@ -351,6 +339,11 @@
         <div class="photo-placeholder" id="photo-placeholder">
             <img id="vitrine-photo" src="" alt="" style="width:100%; height:100%; object-fit:cover; border-radius:14px; display:none;">
             <span id="photo-placeholder-text">🖼️ Vitrinin fotosu/illüstrasiyası üçün yer<br>Photo / illustration placeholder</span>
+        </div>
+
+        <div class="selector-container">
+            <label for="room-select" id="ui-select-label"></label>
+            <select id="room-select" onchange="changeTrack(true)"></select>
         </div>
 
         <div class="player-wrap">
@@ -392,11 +385,6 @@
         <div class="reset-link" id="reset-link" onclick="resetPassport()"></div>
     </div>
 
-    <div id="error-screen" class="screen">
-        <div class="welcome-icon">⚠️</div>
-        <div class="error-box" id="error-text"></div>
-    </div>
-
     <div class="overlay" id="complete-overlay">
         <div class="overlay-card">
             <div class="icon">🎉</div>
@@ -421,7 +409,6 @@
                 localStorage.setItem('matm_ios_prompt_seen', '1');
             }
 
-            // Cihazın dilini yoxlayıb müvafiq düyməni vizual önə çıxarır (məcburi seçim deyil)
             const browserLang = (navigator.language || 'az').toLowerCase();
             if (browserLang.startsWith('en')) {
                 document.getElementById('btn-en').classList.add('suggested');
@@ -436,7 +423,6 @@
                 document.getElementById('reset-link').classList.add('visible');
             }
 
-            // Service Worker qeydiyyatı (offline dəstək üçün)
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('sw.js').then(function(reg) {
                     // Brauzerin sw.js-i öz keşindən deyil, serverdən yenidən yoxlamasını
@@ -447,31 +433,51 @@
             }
         };
 
-        // ============ VİTRİN VERİLƏNLƏR BAZASI ============
-        // Yeni vitrin əlavə etmək üçün bu siyahıya bir sətir əlavə etmək kifayətdir.
-        // quiz sahəsi hazırda "null" saxlanılıb — kurator tərəfindən konkret sual/cavab
-        // yazılana qədər bilik testi bölməsi həmin vitrində görünməyəcək.
-        const vitrineData = {
-            mustye: {
-                az: { title: "Mustye mədəniyyəti", file: "az_mustye.mp3" },
-                en: { title: "Mousterian culture", file: "en_mustye.mp3" },
-                photo: "mustye.jpg"
-            },
-            quruchay: {
-                az: { title: "Quruçay arxeoloji mədəniyyəti", file: "az_quruchay.mp3" },
-                en: { title: "Guruchay archaeological culture", file: "en_quruchay.mp3" },
-                photo: "quruchay.jpg"
-            },
-        };
-        const TOTAL_VITRINES = Object.keys(vitrineData).length;
+        // ============ OTAQ/DÖVR VERİLƏNLƏR BAZASI ============
+        // Hər elementin "id"-si vitrin.html-dəki ?vitrin= açarı ilə eynidir,
+        // ona görə hər iki səhifədə pasport (irəliləyiş) ümumi sayılır.
+        // quiz sahəsi "null" olaraq qalır — kurator konkret sual yazana qədər
+        // bilik testi bölməsi görünməyəcək.
+        const roomsList = [
+            { id: 'quruchay', order: 1,
+              az: { title: "Quruçay arxeoloji mədəniyyəti", file: "az_quruchay.mp3" },
+              en: { title: "Guruchay archaeological culture", file: "en_quruchay.mp3" },
+              photo: "quruchay.jpg",
+              quiz: { az: null, en: null } },
+            { id: 'mustye', order: 2,
+              az: { title: "Mustye mədəniyyəti", file: "az_mustye.mp3" },
+              en: { title: "Mousterian culture", file: "en_mustye.mp3" },
+              photo: "mustye.jpg",
+              quiz: { az: null, en: null } },
+            { id: 'men_med', order: 3,
+              az: { title: "Daş (Neolitə qədərki) dövrünün mənəvi mədəniyyəti", file: "az_men_med.mp3" },
+              en: { title: "Spiritual Culture of the Stone Age (Pre-Neolithic Period)", file: "en_men_med.mp3" },
+              photo: null,
+              quiz: { az: null, en: null } },
+            { id: 'eneolit', order: 4,
+              az: { title: "___", file: "az_eneolit.mp3" },
+              en: { title: "___", file: "en_eneolithic.mp3" },
+              photo: null,
+              quiz: { az: null, en: null } },
+            { id: 'tuncdovru', order: 5,
+              az: { title: "___", file: "az_tuncdovru.mp3" },
+              en: { title: "___", file: "en_bronzeage.mp3" },
+              photo: null,
+              quiz: { az: null, en: null } },
+            { id: 'demirdovru', order: 6,
+              az: { title: "___", file: "az_demirdovru.mp3" },
+              en: { title: "___", file: "en_ironage.mp3" },
+              photo: null,
+              quiz: { az: null, en: null } }
+        ];
+        const TOTAL_VITRINES = roomsList.length;
         const PASSPORT_KEY = 'matm_arxeologiya_passport';
 
         const uiText = {
             az: {
-                museumName: "Milli Azərbaycan Tarixi Muzeyi — Arxeologiya Zalı",
+                museumName: "Arxeologiya Zalı",
+                selectLabel: "Mövzunu seçin:",
                 footer: "© Bütün hüquqlar Milli Azərbaycan Tarixi Muzeyinə aiddir.<br><span>Audio bələdçi Beta versiyadadır.</span> Məzmun süni intellekt tərəfindən səsləndirilmişdir.",
-                errorNoParam: "Bu vitrinə aid QR kod düzgün konfiqurasiya edilməyib. Zəhmət olmasa muzey işçisinə müraciət edin.",
-                errorUnknown: "Bu vitrin üçün audio məlumat tapılmadı.",
                 progress: function(n){ return n + " / " + TOTAL_VITRINES + " vitrin kəşf edildi"; },
                 feedbackQ: "Bu bölüm faydalı oldu?",
                 feedbackThanks: "Təşəkkürlər!",
@@ -481,37 +487,29 @@
                 resetLink: "Pasportu sıfırla"
             },
             en: {
-                museumName: "National Museum of History of Azerbaijan — Archaeology Hall",
+                museumName: "Archaeology Hall",
+                selectLabel: "Select Topic:",
                 footer: "© All rights reserved to the National Museum of History of Azerbaijan.<br><span>Audio guide is in Beta.</span> Content is voiced by Artificial Intelligence.",
-                errorNoParam: "This display case's QR code is not configured correctly. Please contact museum staff.",
-                errorUnknown: "No audio content was found for this display case.",
-                progress: function(n){ return n + " / " + TOTAL_VITRINES + " periods discovered"; },
+                progress: function(n){ return n + " / " + TOTAL_VITRINES + " showcases discovered"; },
                 feedbackQ: "Was this section helpful?",
                 feedbackThanks: "Thank you!",
                 overlayTitle: "Congratulations!",
-                overlayText: "You have discovered all " + TOTAL_VITRINES + " periods of the Archaeology Hall.",
+                overlayText: "You have discovered all " + TOTAL_VITRINES + " showcases in this hall.",
                 overlayClose: "Close",
                 resetLink: "Reset passport"
             }
         };
 
-        function getVitrineKey() {
-            const params = new URLSearchParams(window.location.search);
-            return params.get('vitrin');
-        }
-
         function getPassport() {
-            try {
-                return JSON.parse(localStorage.getItem(PASSPORT_KEY)) || [];
-            } catch(e) { return []; }
+            try { return JSON.parse(localStorage.getItem(PASSPORT_KEY)) || []; } catch(e) { return []; }
         }
         function savePassport(list) {
             try { localStorage.setItem(PASSPORT_KEY, JSON.stringify(list)); } catch(e) {}
         }
-        function markVisited(key) {
+        function markVisited(id) {
             const list = getPassport();
-            if (list.indexOf(key) === -1) {
-                list.push(key);
+            if (list.indexOf(id) === -1) {
+                list.push(id);
                 savePassport(list);
             }
             return list.length;
@@ -530,6 +528,7 @@
             }
         }
 
+        const select = document.getElementById('room-select');
         const player = document.getElementById('main-player');
         const source = document.getElementById('audio-source');
         const titleDisplay = document.getElementById('display-title');
@@ -541,7 +540,7 @@
         const timeCurrent = document.getElementById('time-current');
         const timeDuration = document.getElementById('time-duration');
         let currentLang = 'az';
-        let currentKey = null;
+        let currentRoomId = null;
         let milestonesFired = {};
 
         function togglePlay() {
@@ -581,30 +580,44 @@
                 }
             }
 
+            document.getElementById('ui-museum-name').innerHTML = uiText[lang].museumName;
+            document.getElementById('ui-select-label').innerHTML = uiText[lang].selectLabel;
             document.getElementById('ui-footer').innerHTML = uiText[lang].footer;
             document.getElementById('overlay-close').innerText = uiText[lang].overlayClose;
             document.getElementById('reset-link').innerText = uiText[lang].resetLink;
 
-            const key = getVitrineKey();
-            currentKey = key;
+            select.innerHTML = '';
+            roomsList.forEach(function(room) {
+                let option = document.createElement('option');
+                option.value = room.id;
+                option.innerText = room.order + '. ' + room[lang].title;
+                select.appendChild(option);
+            });
 
-            if (!key) {
-                showError(uiText[lang].errorNoParam);
-                return;
+            changeTrack(false);
+
+            document.getElementById('welcome-screen').classList.remove('active');
+            document.getElementById('player-screen').classList.add('active');
+
+            if (typeof gtag === 'function') {
+                gtag('event', 'language_selected', {
+                    'event_category': 'Audio Guide - Archaeology',
+                    'event_label': lang === 'az' ? 'Azerbaijani' : 'English'
+                });
             }
+        }
 
-            const vitrine = vitrineData[key];
-            if (!vitrine) {
-                showError(uiText[lang].errorUnknown);
-                return;
-            }
+        function changeTrack(autoPlay) {
+            const roomId = select.value;
+            const room = roomsList.find(function(r){ return r.id === roomId; });
+            if (!room) return;
+            currentRoomId = roomId;
 
-            document.getElementById('ui-museum-name').innerHTML = uiText[lang].museumName;
-            titleDisplay.innerText = vitrine[lang].title;
-            source.src = vitrine[lang].file;
+            source.src = room[currentLang].file;
+            titleDisplay.innerText = room[currentLang].title;
             player.load();
 
-            playBtn.style.background = lang === 'en' ? 'var(--accent-en)' : 'var(--accent-az)';
+            playBtn.style.background = currentLang === 'en' ? 'var(--accent-en)' : 'var(--accent-az)';
             progressFill.style.width = '0%';
             timeCurrent.innerText = '0:00';
             timeDuration.innerText = '0:00';
@@ -615,9 +628,9 @@
             const photoImg = document.getElementById('vitrine-photo');
             const photoText = document.getElementById('photo-placeholder-text');
 
-            if (SHOW_PHOTOS && vitrine.photo) {
+            if (SHOW_PHOTOS && room.photo) {
                 photoBox.classList.add('visible');
-                photoImg.src = vitrine.photo;
+                photoImg.src = room.photo;
                 photoImg.style.display = 'block';
                 photoText.style.display = 'none';
             } else if (SHOW_PHOTOS) {
@@ -630,30 +643,24 @@
 
             setupWaveform();
             if (audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
-            player.play().catch(e => console.log("Avtomatik oxutma bloklandı"));
 
-            // Rəy bölməsini hazırla (audio bitəndə göstəriləcək)
-            document.getElementById('feedback-question').innerText = uiText[lang].feedbackQ;
-            document.getElementById('feedback-thanks').innerText = uiText[lang].feedbackThanks;
+            document.getElementById('feedback-question').innerText = uiText[currentLang].feedbackQ;
+            document.getElementById('feedback-thanks').innerText = uiText[currentLang].feedbackThanks;
+            document.getElementById('feedback-box').style.display = 'none';
+            document.getElementById('feedback-up').disabled = false;
+            document.getElementById('feedback-down').disabled = false;
+            document.getElementById('feedback-up').classList.remove('selected');
+            document.getElementById('feedback-down').classList.remove('selected');
+            document.getElementById('feedback-thanks').style.display = 'none';
 
-            // Bilik testini hazırla (əgər kurator sual əlavə edibsə)
-            setupQuiz(vitrine[lang].quiz, lang);
+            setupQuiz(room.quiz[currentLang], currentLang);
 
-            document.getElementById('welcome-screen').classList.remove('active');
-            document.getElementById('player-screen').classList.add('active');
+            const badge = document.getElementById('progress-badge-player');
+            badge.innerText = uiText[currentLang].progress(getPassport().length);
 
-            if (typeof gtag === 'function') {
-                gtag('event', 'vitrine_audio_start', {
-                    'event_category': 'Audio Guide - Archaeology',
-                    'event_label': key + ' (' + lang + ')'
-                });
+            if (autoPlay) {
+                player.play().catch(e => console.log("Avtomatik oxutma bloklandı"));
             }
-        }
-
-        function showError(message) {
-            document.getElementById('error-text').innerText = message;
-            document.getElementById('welcome-screen').classList.remove('active');
-            document.getElementById('error-screen').classList.add('active');
         }
 
         // ============ SƏS DALĞASI (Web Audio API) ============
@@ -662,7 +669,7 @@
         const canvasCtx = canvas.getContext ? canvas.getContext('2d') : null;
 
         function setupWaveform() {
-            if (audioCtx) return; // yalnız bir dəfə qurulur
+            if (audioCtx) return;
             try {
                 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
                 audioCtx = new AudioContextClass();
@@ -670,7 +677,7 @@
                 analyser.fftSize = 64;
                 sourceNode = audioCtx.createMediaElementSource(player);
                 sourceNode.connect(analyser);
-                analyser.connect(audioCtx.destination); // vacib: səsin eşidilməsi üçün
+                analyser.connect(audioCtx.destination);
             } catch (e) {
                 console.log('Səs dalğası dəstəklənmir, adi pleyer işləyəcək.', e);
                 audioCtx = null;
@@ -729,16 +736,16 @@
                 progressFill.style.width = ((player.currentTime / player.duration) * 100) + '%';
                 timeCurrent.innerText = formatTime(player.currentTime);
             }
-            if (!player.duration || !currentKey) return;
+            if (!player.duration || !currentRoomId) return;
             const pct = Math.floor((player.currentTime / player.duration) * 100);
             [25, 50, 75, 100].forEach(function(threshold) {
-                const flagKey = currentKey + '_' + threshold;
+                const flagKey = currentRoomId + '_' + threshold;
                 if (pct >= threshold && !milestonesFired[flagKey]) {
                     milestonesFired[flagKey] = true;
                     if (typeof gtag === 'function') {
                         gtag('event', 'audio_progress', {
                             'event_category': 'Audio Guide - Archaeology',
-                            'event_label': currentKey + ' (' + currentLang + ') - ' + threshold + '%'
+                            'event_label': currentRoomId + ' (' + currentLang + ') - ' + threshold + '%'
                         });
                     }
                 }
@@ -747,16 +754,24 @@
 
         // ============ AUDIO BİTDİKDƏ: PASPORT + RƏY + TEST ============
         player.addEventListener('ended', function() {
-            if (!currentKey) return;
+            if (!currentRoomId) return;
 
-            const visitedCount = markVisited(currentKey);
+            const visitedCount = markVisited(currentRoomId);
             const badge = document.getElementById('progress-badge-player');
             badge.innerText = uiText[currentLang].progress(visitedCount);
+            updateWelcomeProgressBadge();
 
             document.getElementById('feedback-box').style.display = 'block';
 
             if (visitedCount >= TOTAL_VITRINES) {
                 showCompleteOverlay();
+            }
+
+            if (typeof gtag === 'function') {
+                gtag('event', 'audio_play', {
+                    'event_category': 'Audio Guide - Archaeology',
+                    'event_label': currentRoomId + ' (' + currentLang + ')'
+                });
             }
         });
 
@@ -780,13 +795,13 @@
             if (typeof gtag === 'function') {
                 gtag('event', 'vitrine_feedback', {
                     'event_category': 'Audio Guide - Archaeology',
-                    'event_label': currentKey + ' (' + currentLang + ')',
+                    'event_label': currentRoomId + ' (' + currentLang + ')',
                     'value': positive ? 1 : 0
                 });
             }
         }
 
-        // ============ BİLİK TESTİ (kurator sual əlavə edəndə aktivləşir) ============
+        // ============ BİLİK TESTİ ============
         function setupQuiz(quiz, lang) {
             const box = document.getElementById('quiz-box');
             if (!quiz) {
@@ -812,7 +827,7 @@
                     if (typeof gtag === 'function') {
                         gtag('event', 'vitrine_quiz_answer', {
                             'event_category': 'Audio Guide - Archaeology',
-                            'event_label': currentKey + ' (' + lang + ')',
+                            'event_label': currentRoomId + ' (' + lang + ')',
                             'value': index === quiz.correctIndex ? 1 : 0
                         });
                     }
