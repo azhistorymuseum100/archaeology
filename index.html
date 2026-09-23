@@ -10,7 +10,7 @@
     <meta name="theme-color" content="#0056b3">
     <link rel="manifest" href="manifest.json">
 
-    <title>Archaeology Section Audio Guide / Arxeologiya Bölməsi</title>
+    <title>Archaeology Section / Arxeologiya Bölməsi</title>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-WF2527NXYS"></script>
     <script>
@@ -335,7 +335,7 @@
 
     <div id="welcome-screen" class="screen active">
         <img src="logo.png" alt="MATM" style="max-width:100px; height:auto; margin:0 auto 18px auto; display:block;">
-        <div class="welcome-icon">🏺</div>
+        <!--div class="welcome-icon">🏺</div-->
         <div class="welcome-title">Xoş Gəlmisiniz / Welcome</div>
         <div class="welcome-desc">Dil seçin / Select language</div>
 
@@ -503,28 +503,28 @@
 
         const uiText = {
             az: {
-                museumName: "Arxeologiya Zalı",
+                museumName: "Səsli Bələdçi",
                 selectLabel: "Mövzunu seçin:",
                 backLabel: "Geri",
                 footer: "© Bütün hüquqlar Milli Azərbaycan Tarixi Muzeyinə aiddir.<br><span>Audio bələdçi Beta versiyadadır.</span> Məzmun süni intellekt tərəfindən səsləndirilmişdir.",
-                progress: function(n){ return n + " / " + TOTAL_VITRINES + " vitrin kəşf edildi"; },
+                progress: function(n){ return n + " / " + TOTAL_VITRINES + " mövzu kəşf edildi"; },
                 feedbackQ: "Bu bölüm faydalı oldu?",
                 feedbackThanks: "Təşəkkürlər!",
                 overlayTitle: "Təbriklər!",
-                overlayText: "Bu zalın bütün " + TOTAL_VITRINES + " vitrinini kəşf etdiniz.",
+                overlayText: "Bu zalın bütün " + TOTAL_VITRINES + " mövzusunu kəşf etdiniz.",
                 overlayClose: "Bağla",
                 resetLink: "Pasportu sıfırla"
             },
             en: {
-                museumName: "Archaeology Hall",
+                museumName: "Audio Guide",
                 selectLabel: "Select Topic:",
                 backLabel: "Back",
                 footer: "© All rights reserved to the National Museum of History of Azerbaijan.<br><span>Audio guide is in Beta.</span> Content is voiced by Artificial Intelligence.",
-                progress: function(n){ return n + " / " + TOTAL_VITRINES + " showcases discovered"; },
+                progress: function(n){ return n + " / " + TOTAL_VITRINES + " subjects discovered"; },
                 feedbackQ: "Was this section helpful?",
                 feedbackThanks: "Thank you!",
                 overlayTitle: "Congratulations!",
-                overlayText: "You have discovered all " + TOTAL_VITRINES + " showcases in this hall.",
+                overlayText: "You have discovered all " + TOTAL_VITRINES + " subjects in this hall.",
                 overlayClose: "Close",
                 resetLink: "Reset passport"
             }
