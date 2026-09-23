@@ -338,6 +338,19 @@
             box-sizing: border-box;
         }
         .global-footer span { font-weight: bold; color: #555; }
+        .credit-line {
+            margin-top: 8px;
+            font-size: 10px;
+        }
+        .credit-line a {
+            color: #aaa;
+            text-decoration: none;
+        }
+        .credit-line a:hover,
+        .credit-line a:active {
+            color: #0056b3;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -432,7 +445,12 @@
         </div>
     </div>
 
-    <div class="global-footer" id="ui-footer"></div>
+    <div class="global-footer">
+        <div id="ui-footer"></div>
+        <div class="credit-line">
+            <a href="https://www.linkedin.com/in/emin-dadashov/" target="_blank" rel="noopener noreferrer">Created by Emin D. 2026</a>
+        </div>
+    </div>
 
     <script>
         const SHOW_PHOTOS = false; // real vitrin fotoları hazır olanda "true" edin
