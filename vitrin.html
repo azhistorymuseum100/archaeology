@@ -10,7 +10,7 @@
     <meta name="theme-color" content="#0056b3">
     <link rel="manifest" href="manifest.json">
 
-    <title>Archaeology Section Audio Guide / Arxeologiya Bölməsi</title>
+    <title>Audio Guide / Audio Bələdçi</title>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-WF2527NXYS"></script>
     <script>
@@ -29,6 +29,7 @@
             --border-color: #dddddd;
             --accent-az: #0056b3;
             --accent-en: #b30000;
+            --accent-tr: #e30a17;
         }
 
         body {
@@ -88,26 +89,16 @@
         .back-btn-icon { font-size: 26px; line-height: 1; }
         .back-btn-label { font-size: 15px; font-weight: bold; line-height: 1; }
 
-        /* --- Loqo placeholder --- */
-        .logo-placeholder {
-            width: 100%;
-            max-width: 100px;
-            height: 40px;
-            margin: 0 auto 14px auto;
-            border: 2px dashed #bbb;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 9px;
-            color: #999;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
         .welcome-icon { font-size: 50px; margin-bottom: 10px; }
         .welcome-title { font-size: 22px; font-weight: bold; color: var(--text-main); margin-bottom: 5px; }
         .welcome-desc { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 25px; }
+
+        .lang-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
 
         .btn-lang {
             color: white;
@@ -119,11 +110,11 @@
             cursor: pointer;
             transition: opacity 0.3s, transform 0.2s, box-shadow 0.3s;
             width: 100%;
-            margin-bottom: 15px;
         }
         .btn-lang:active { opacity: 0.8; }
         .btn-az { background: var(--accent-az); }
-        .btn-en { background: var(--accent-en); margin-bottom: 5px; }
+        .btn-en { background: var(--accent-en); }
+        .btn-tr { background: var(--accent-tr); }
         .btn-lang.suggested {
             transform: scale(1.03);
             box-shadow: 0 0 0 3px rgba(0,86,179,0.25);
@@ -132,13 +123,12 @@
         .museum-name { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; font-weight: bold; }
         .track-title { font-size: 24px; font-weight: bold; color: var(--text-main); min-height: 50px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
 
-        /* --- Foto/illüstrasiya placeholder --- */
         .photo-placeholder {
             width: 100%;
             aspect-ratio: 16 / 9;
             border: 2px dashed #bbb;
             border-radius: 14px;
-            display: none; /* SHOW_PHOTOS = false olduqda gizli qalır, foto əlavə olunanda JS ilə açılır */
+            display: none;
             align-items: center;
             justify-content: center;
             color: #999;
@@ -151,7 +141,6 @@
         }
         .photo-placeholder.visible { display: flex; }
 
-        /* --- Pasport / irəliləyiş --- */
         .progress-badge {
             font-size: 12px;
             color: var(--text-muted);
@@ -163,7 +152,6 @@
             font-weight: bold;
         }
 
-        /* --- Səs dalğası animasiyası --- */
         .player-wrap {
             position: relative;
             width: 100%;
@@ -231,7 +219,6 @@
             border-radius: 3px;
         }
 
-        /* --- Rəy (👍/👎) --- */
         .feedback-box { margin-top: 4px; }
         .feedback-question { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
         .feedback-buttons { display: flex; gap: 12px; justify-content: center; }
@@ -248,7 +235,6 @@
         .feedback-btn.selected { background: #e6f0ff; border-color: var(--accent-az); }
         .feedback-thanks { font-size: 13px; color: #1a7d34; font-weight: bold; margin-top: 8px; display: none; }
 
-        /* --- Bilik testi --- */
         .quiz-box {
             margin-top: 18px;
             padding-top: 18px;
@@ -283,7 +269,6 @@
             border: 1px solid #f5c2c0;
         }
 
-        /* --- Pasport tamamlanma overlay --- */
         .overlay {
             position: fixed;
             inset: 0;
@@ -318,7 +303,7 @@
         }
 
         .reset-link {
-            display: none; /* yalnız ?debug=1 URL parametri ilə görünür */
+            display: none;
             font-size: 11px;
             color: #bbb;
             margin-top: 16px;
@@ -339,14 +324,27 @@
             box-sizing: border-box;
         }
         .global-footer span { font-weight: bold; color: #555; }
+        .credit-line {
+            margin-top: 8px;
+            font-size: 10px;
+        }
+        .credit-line a {
+            color: #aaa;
+            text-decoration: none;
+        }
+        .credit-line a:hover,
+        .credit-line a:active {
+            color: #0056b3;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
 
     <div id="welcome-screen" class="screen active">
-        <div class="logo-placeholder">MATM LOQOSU / LOGO</div>
-        <div class="welcome-icon">🏺</div>
+        <img src="logo.png" alt="MATM" style="max-width:50px; height:auto; margin:0 auto 18px auto; display:block;">
         <div class="welcome-title">Xoş Gəlmisiniz / Welcome</div>
+        <div class="welcome-icon">🏺</div>
         <div class="welcome-desc">Dil seçin / Select language</div>
 
         <div id="ios-prompt" style="display: none; background: #fff3cd; color: #856404; padding: 12px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; border: 1px solid #ffeeba; text-align: left; line-height: 1.5;">
@@ -358,8 +356,11 @@
 
         <div id="progress-badge-welcome" class="progress-badge" style="display:none;"></div>
 
-        <button id="btn-az" class="btn-lang btn-az" onclick="startApp('az')">🇦🇿 Azərbaycan</button>
-        <button id="btn-en" class="btn-lang btn-en" onclick="startApp('en')">🇬🇧 English</button>
+        <div class="lang-buttons">
+            <button id="btn-az" class="btn-lang btn-az" onclick="startApp('az')">🇦🇿 Azərbaycan</button>
+            <button id="btn-tr" class="btn-lang btn-tr" onclick="startApp('tr')">🇹🇷 Türkçe</button>
+            <button id="btn-en" class="btn-lang btn-en" onclick="startApp('en')">🇬🇧 English</button>
+        </div>
     </div>
 
     <div id="player-screen" class="screen">
@@ -433,14 +434,17 @@
         </div>
     </div>
 
-    <div class="global-footer" id="ui-footer"></div>
+    <div class="global-footer">
+        <div id="ui-footer"></div>
+        <div class="credit-line">
+            <a href="https://www.linkedin.com/in/emin-dadashov/" target="_blank" rel="noopener noreferrer">Created by Emin D. 2026</a>
+        </div>
+    </div>
 
     <script>
-        const SHOW_PHOTOS = false; // real vitrin fotoları hazır olanda "true" edin
+        const SHOW_PHOTOS = false; 
 
         window.onload = function() {
-            // Tarixçənin başlanğıc vəziyyəti həmişə "dil seçimi" ekranıdır.
-            // Bu, Android-də geri düyməsi/jesti düzgün işləməsi üçün lazımdır.
             history.replaceState({ screen: 'welcome' }, '');
 
             let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -452,46 +456,52 @@
                 localStorage.setItem('matm_ios_prompt_seen', '1');
             }
 
-            // Cihazın dilini yoxlayıb müvafiq düyməni vizual önə çıxarır (məcburi seçim deyil)
             const browserLang = (navigator.language || 'az').toLowerCase();
             if (browserLang.startsWith('en')) {
                 document.getElementById('btn-en').classList.add('suggested');
+            } else if (browserLang.startsWith('tr')) {
+                document.getElementById('btn-tr').classList.add('suggested');
             } else {
                 document.getElementById('btn-az').classList.add('suggested');
             }
 
             updateWelcomeProgressBadge();
 
-            // Debug rejimi: yalnız ?debug=1 ilə açılanda pasportu sıfırlama linki görünür
             if (new URLSearchParams(window.location.search).get('debug') === '1') {
                 document.getElementById('reset-link').classList.add('visible');
             }
 
-            // Service Worker qeydiyyatı (offline dəstək üçün)
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('sw.js').then(function(reg) {
-                    // Brauzerin sw.js-i öz keşindən deyil, serverdən yenidən yoxlamasını
-                    // məcbur edir — iOS Safari daxil, bəzi brauzerlər sw.js faylını
-                    // özü də uzun müddət keşdə saxlaya bilir.
                     reg.update();
                 }).catch(function(e){ console.log('SW qeydiyyatı alınmadı', e); });
             }
         };
 
-        // ============ VİTRİN VERİLƏNLƏR BAZASI ============
-        // Yeni vitrin əlavə etmək üçün bu siyahıya bir sətir əlavə etmək kifayətdir.
-        // quiz sahəsi hazırda "null" saxlanılıb — kurator tərəfindən konkret sual/cavab
-        // yazılana qədər bilik testi bölməsi həmin vitrində görünməyəcək.
         const vitrineData = {
+            quruchay: {
+                az: { title: "Quruçay arxeoloji mədəniyyəti", file: "az_quruchay_kartal.mp3" },
+                en: { title: "Guruchay archaeological culture", file: "en_quruchay_female.mp3" },
+                tr: { title: "Guruçay arkeolojik kültürü", file: "tr_quruchay.mp3" },
+                photo: "quruchay.jpg"
+            },
             mustye: {
-                az: { title: "Mustye mədəniyyəti", file: "az_mustye.mp3" },
-                en: { title: "Mousterian culture", file: "en_mustye.mp3" },
+                az: { title: "Mustye mədəniyyəti", file: "az_mustye_kartal.mp3" },
+                en: { title: "Mousterian culture", file: "en_mustye_sarah.mp3" },
+                tr: { title: "Musteryen kültürü", file: "tr_mustye_murat.mp3" },
                 photo: "mustye.jpg"
             },
-            quruchay: {
-                az: { title: "Quruçay arxeoloji mədəniyyəti", file: "az_quruchay.mp3" },
-                en: { title: "Guruchay archaeological culture", file: "en_quruchay.mp3" },
-                photo: "quruchay.jpg"
+            men_med: {
+                az: { title: "Daş (Neolitə qədərki) dövrünün mənəvi mədəniyyəti", file: "az_men_med_kartal.mp3" },
+                en: { title: "Spiritual Culture of the Stone Age (Pre-Neolithic Period)", file: "en_men_med_sarah.mp3" },
+                tr: { title: "Taş Devri'nin (Neolitik öncesi dönem) manevi kültürü", file: "tr_men_med_murat.mp3" },
+                photo: null,
+            },
+            qobustan: {
+                az: { title: "Qobustan mədəniyyəti", file: "az_qobustan_kartal.mp3" },
+                en: { title: "Gobustan Culture", file: "en_qobustan_sarah.mp3" },
+                tr: { title: "Gobustan Kültürü", file: "tr_qobustan_murat.mp3" },
+                photo: null,
             },
         };
         const TOTAL_VITRINES = Object.keys(vitrineData).length;
@@ -504,11 +514,11 @@
                 footer: "© Bütün hüquqlar Milli Azərbaycan Tarixi Muzeyinə aiddir.<br><span>Audio bələdçi Beta versiyadadır.</span> Məzmun süni intellekt tərəfindən səsləndirilmişdir.",
                 errorNoParam: "Bu vitrinə aid QR kod düzgün konfiqurasiya edilməyib. Zəhmət olmasa muzey işçisinə müraciət edin.",
                 errorUnknown: "Bu vitrin üçün audio məlumat tapılmadı.",
-                progress: function(n){ return n + " / " + TOTAL_VITRINES + " vitrin kəşf edildi"; },
+                progress: function(n){ return n + " / " + TOTAL_VITRINES + " mövzu kəşf edildi"; },
                 feedbackQ: "Bu bölüm faydalı oldu?",
                 feedbackThanks: "Təşəkkürlər!",
                 overlayTitle: "Təbriklər!",
-                overlayText: "Bu zalın bütün " + TOTAL_VITRINES + " vitrinini kəşf etdiniz.",
+                overlayText: "Bu zalın bütün " + TOTAL_VITRINES + " mövzusunu kəşf etdiniz.",
                 overlayClose: "Bağla",
                 resetLink: "Pasportu sıfırla"
             },
@@ -518,13 +528,27 @@
                 footer: "© All rights reserved to the National Museum of History of Azerbaijan.<br><span>Audio guide is in Beta.</span> Content is voiced by Artificial Intelligence.",
                 errorNoParam: "This display case's QR code is not configured correctly. Please contact museum staff.",
                 errorUnknown: "No audio content was found for this display case.",
-                progress: function(n){ return n + " / " + TOTAL_VITRINES + " periods discovered"; },
+                progress: function(n){ return n + " / " + TOTAL_VITRINES + " subjects discovered"; },
                 feedbackQ: "Was this section helpful?",
                 feedbackThanks: "Thank you!",
                 overlayTitle: "Congratulations!",
-                overlayText: "You have discovered all " + TOTAL_VITRINES + " periods of the Archaeology Hall.",
+                overlayText: "You have discovered all " + TOTAL_VITRINES + " subjects of the Archaeology Hall.",
                 overlayClose: "Close",
                 resetLink: "Reset passport"
+            },
+            tr: {
+                museumName: "Azerbaycan Milli Tarih Müzesi — Arkeoloji Salonu",
+                backLabel: "Geri",
+                footer: "© Tüm hakları Azerbaycan Milli Tarih Müzesi'ne aittir.<br><span>Sesli rehber Beta sürümündedir.</span> İçerik yapay zeka tarafından seslendirilmiştir.",
+                errorNoParam: "Bu vitrine ait QR kod doğru yapılandırılmamış. Lütfen müze görevlisine başvurun.",
+                errorUnknown: "Bu vitrin için sesli bilgi bulunamadı.",
+                progress: function(n){ return n + " / " + TOTAL_VITRINES + " konu keşfedildi"; },
+                feedbackQ: "Bu bölüm faydalı oldu mu?",
+                feedbackThanks: "Teşekkürler!",
+                overlayTitle: "Tebrikler!",
+                overlayText: "Bu salonun tüm " + TOTAL_VITRINES + " konusunu keşfettiniz.",
+                overlayClose: "Kapat",
+                resetLink: "Pasaportu sıfırla"
             }
         };
 
@@ -534,9 +558,7 @@
         }
 
         function getPassport() {
-            try {
-                return JSON.parse(localStorage.getItem(PASSPORT_KEY)) || [];
-            } catch(e) { return []; }
+            try { return JSON.parse(localStorage.getItem(PASSPORT_KEY)) || []; } catch(e) { return []; }
         }
         function savePassport(list) {
             try { localStorage.setItem(PASSPORT_KEY, JSON.stringify(list)); } catch(e) {}
@@ -557,7 +579,8 @@
             const count = getPassport().length;
             const badge = document.getElementById('progress-badge-welcome');
             if (count > 0) {
-                const lang = (navigator.language || 'az').toLowerCase().startsWith('en') ? 'en' : 'az';
+                const browserLang = (navigator.language || 'az').toLowerCase();
+                const lang = browserLang.startsWith('en') ? 'en' : (browserLang.startsWith('tr') ? 'tr' : 'az');
                 badge.innerText = uiText[lang].progress(count);
                 badge.style.display = 'inline-block';
             }
@@ -639,7 +662,7 @@
             source.src = vitrine[lang].file;
             player.load();
 
-            playBtn.style.background = lang === 'en' ? 'var(--accent-en)' : 'var(--accent-az)';
+            playBtn.style.background = lang === 'en' ? 'var(--accent-en)' : (lang === 'tr' ? 'var(--accent-tr)' : 'var(--accent-az)');
             progressFill.style.width = '0%';
             timeCurrent.innerText = '0:00';
             timeDuration.innerText = '0:00';
@@ -667,15 +690,11 @@
             if (audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
             player.play().catch(e => console.log("Avtomatik oxutma bloklandı"));
 
-            // Rəy bölməsini hazırla (audio bitəndə göstəriləcək)
             document.getElementById('feedback-question').innerText = uiText[lang].feedbackQ;
             document.getElementById('feedback-thanks').innerText = uiText[lang].feedbackThanks;
 
-            // Bilik testini hazırla (əgər kurator sual əlavə edibsə)
             setupQuiz(vitrine[lang].quiz, lang);
 
-            // Pleyer ekranına keçərkən tarixçəyə yeni qeyd əlavə edilir ki,
-            // Android-də geri düyməsi/jesti bu qeydi "pop" edə bilsin.
             history.pushState({ screen: 'player' }, '');
 
             document.getElementById('welcome-screen').classList.remove('active');
@@ -696,7 +715,6 @@
             document.getElementById('error-screen').classList.add('active');
         }
 
-        // ============ GERİ NAVİQASİYASI (Android geri düyməsi/jesti + in-app düymə) ============
         function exitFullscreenIfActive() {
             if (document.fullscreenElement || document.webkitFullscreenElement) {
                 if (document.exitFullscreen) {
@@ -707,9 +725,6 @@
             }
         }
 
-        // Dil seçimi ekranına qayıdır: fullscreen-dən çıxır, audionu dayandırır,
-        // bütün digər ekranları gizlədir. HƏM in-app "◀ Geri" düyməsi, HƏM DƏ
-        // sistemin geri düyməsi/jesti (popstate) tərəfindən çağırılır.
         function goToWelcome() {
             exitFullscreenIfActive();
             if (player && !player.paused) player.pause();
@@ -719,16 +734,10 @@
             updateWelcomeProgressBadge();
         }
 
-        // In-app "◀ Geri" düyməsi: tarixçəni geri sürüşdürür, faktiki keçidi
-        // isə popstate hadisəsi (aşağıda) idarə edir.
         function goBack() {
             history.back();
         }
 
-        // Sistem/brauzer geri düyməsi və ya jesti basılanda işə düşür.
-        // 1-ci basış: player/error -> welcome. 2-ci basış: tarixçədə daha
-        // əvvəlki qeyd olmadığı üçün brauzer normal davranışı ilə
-        // tətbiqi/tabı tərk edir.
         window.addEventListener('popstate', function(event) {
             if (event.state && event.state.screen === 'player') {
                 document.getElementById('welcome-screen').classList.remove('active');
@@ -739,13 +748,12 @@
             }
         });
 
-        // ============ SƏS DALĞASI (Web Audio API) ============
         let audioCtx, analyser, sourceNode, waveAnimId;
         const canvas = document.getElementById('waveform');
         const canvasCtx = canvas.getContext ? canvas.getContext('2d') : null;
 
         function setupWaveform() {
-            if (audioCtx) return; // yalnız bir dəfə qurulur
+            if (audioCtx) return;
             try {
                 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
                 audioCtx = new AudioContextClass();
@@ -753,7 +761,7 @@
                 analyser.fftSize = 64;
                 sourceNode = audioCtx.createMediaElementSource(player);
                 sourceNode.connect(analyser);
-                analyser.connect(audioCtx.destination); // vacib: səsin eşidilməsi üçün
+                analyser.connect(audioCtx.destination); 
             } catch (e) {
                 console.log('Səs dalğası dəstəklənmir, adi pleyer işləyəcək.', e);
                 audioCtx = null;
@@ -806,7 +814,6 @@
             canvas.classList.remove('visible');
         });
 
-        // ============ GA4: TAMAMLANMA FAİZİ ============
         player.addEventListener('timeupdate', function() {
             if (player.duration) {
                 progressFill.style.width = ((player.currentTime / player.duration) * 100) + '%';
@@ -828,7 +835,6 @@
             });
         });
 
-        // ============ AUDIO BİTDİKDƏ: PASPORT + RƏY + TEST ============
         player.addEventListener('ended', function() {
             if (!currentKey) return;
 
@@ -852,7 +858,6 @@
             document.getElementById('complete-overlay').classList.remove('active');
         }
 
-        // ============ RƏY (👍 / 👎) ============
         function sendFeedback(positive) {
             document.getElementById('feedback-up').classList.toggle('selected', positive);
             document.getElementById('feedback-down').classList.toggle('selected', !positive);
@@ -869,7 +874,6 @@
             }
         }
 
-        // ============ BİLİK TESTİ (kurator sual əlavə edəndə aktivləşir) ============
         function setupQuiz(quiz, lang) {
             const box = document.getElementById('quiz-box');
             if (!quiz) {
