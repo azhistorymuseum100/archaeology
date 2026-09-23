@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Arxeologiya">
+    <meta name="theme-color" content="#0056b3">
+    <link rel="manifest" href="manifest.json">
+
+    <title>Archaeology Section Audio Guide / Arxeologiya Bölməsi</title>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WF2527NXYS"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-WF2527NXYS');
+    </script>
+
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-muted: #666666;
+            --border-color: #dddddd;
+            --accent-az: #0056b3;
+            --accent-en: #b30000;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+        }
+
+        .screen {
+            position: relative;
+            background: var(--card-bg);
+            padding: 30px 25px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            display: none;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+
+        .screen.active {
+            display: flex;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: none;
+            background: #f0f2f5;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2;
+            padding: 0;
+        }
+        .back-btn:active { opacity: 0.7; }
+
+        /* --- Loqo placeholder --- */
+        .logo-placeholder {
+            width: 100%;
+            max-width: 100px;
+            height: 40px;
+            margin: 0 auto 14px auto;
+            border: 2px dashed #bbb;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .welcome-icon { font-size: 50px; margin-bottom: 10px; }
+        .welcome-title { font-size: 22px; font-weight: bold; color: var(--text-main); margin-bottom: 5px; }
+        .welcome-desc { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 25px; }
+
+        .btn-lang {
+            color: white;
+            border: none;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.3s, transform 0.2s, box-shadow 0.3s;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        .btn-lang:active { opacity: 0.8; }
+        .btn-az { background: var(--accent-az); }
+        .btn-en { background: var(--accent-en); margin-bottom: 5px; }
+        .btn-lang.suggested {
+            transform: scale(1.03);
+            box-shadow: 0 0 0 3px rgba(0,86,179,0.25);
+        }
+
+        .museum-name { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; font-weight: bold; }
+        .track-title { font-size: 24px; font-weight: bold; color: var(--text-main); min-height: 50px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+
+        /* --- Foto/illüstrasiya placeholder --- */
+        .photo-placeholder {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border: 2px dashed #bbb;
+            border-radius: 14px;
+            display: none; /* SHOW_PHOTOS = false olduqda gizli qalır, foto əlavə olunanda JS ilə açılır */
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 13px;
+            margin-bottom: 18px;
+            background: repeating-linear-gradient(45deg, #fafafa, #fafafa 10px, #f2f2f2 10px, #f2f2f2 20px);
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .photo-placeholder.visible { display: flex; }
+
+        /* --- Pasport / irəliləyiş --- */
+        .progress-badge {
+            font-size: 12px;
+            color: var(--text-muted);
+            background: #f0f2f5;
+            border-radius: 20px;
+            padding: 6px 14px;
+            display: inline-block;
+            margin-bottom: 16px;
+            font-weight: bold;
+        }
+
+        /* --- Səs dalğası animasiyası --- */
+        .player-wrap {
+            position: relative;
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #fafafa;
+            margin-bottom: 18px;
+            padding: 22px 16px 16px 16px;
+            box-sizing: border-box;
+        }
+
+        #waveform {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        #waveform.visible { opacity: 0.16; }
+
+        .player-controls {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .play-btn {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: var(--accent-az);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(0,86,179,0.35);
+            margin-bottom: 16px;
+            transition: transform 0.15s, background 0.2s;
+        }
+        .play-btn:active { transform: scale(0.93); }
+
+        .progress-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+        .time-label { font-size: 11px; color: var(--text-muted); min-width: 32px; }
+        .progress-track {
+            flex: 1;
+            height: 6px;
+            background: #ddd;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-az);
+            border-radius: 3px;
+        }
+
+        /* --- Rəy (👍/👎) --- */
+        .feedback-box { margin-top: 4px; }
+        .feedback-question { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+        .feedback-buttons { display: flex; gap: 12px; justify-content: center; }
+        .feedback-btn {
+            font-size: 26px;
+            background: #fafafa;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 8px 18px;
+            cursor: pointer;
+            transition: transform 0.15s, background 0.2s;
+        }
+        .feedback-btn:active { transform: scale(0.92); }
+        .feedback-btn.selected { background: #e6f0ff; border-color: var(--accent-az); }
+        .feedback-thanks { font-size: 13px; color: #1a7d34; font-weight: bold; margin-top: 8px; display: none; }
+
+        /* --- Bilik testi --- */
+        .quiz-box {
+            margin-top: 18px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border-color);
+            text-align: left;
+            display: none;
+        }
+        .quiz-question { font-size: 15px; font-weight: bold; color: var(--text-main); margin-bottom: 12px; text-align: center; }
+        .quiz-option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: #fafafa;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+        .quiz-option.correct { background: #e2f7e6; border-color: #1a7d34; }
+        .quiz-option.wrong { background: #fdecea; border-color: #b30000; }
+
+        .error-box {
+            background: #fdecea;
+            color: #b30000;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+            border: 1px solid #f5c2c0;
+        }
+
+        /* --- Pasport tamamlanma overlay --- */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .overlay.active { display: flex; }
+        .overlay-card {
+            background: white;
+            border-radius: 18px;
+            padding: 30px 24px;
+            text-align: center;
+            max-width: 380px;
+        }
+        .overlay-card .icon { font-size: 46px; margin-bottom: 10px; }
+        .overlay-card h3 { margin: 0 0 8px 0; color: var(--text-main); }
+        .overlay-card p { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin-bottom: 18px; }
+        .overlay-close {
+            background: var(--accent-az);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .reset-link {
+            display: none; /* yalnız ?debug=1 URL parametri ilə görünür */
+            font-size: 11px;
+            color: #bbb;
+            margin-top: 16px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .reset-link.visible { display: block; }
+
+        .global-footer {
+            width: 100%;
+            max-width: 450px;
+            margin: 20px auto 0 auto;
+            text-align: center;
+            font-size: 11px;
+            color: #888;
+            line-height: 1.6;
+            padding: 0 20px 20px 20px;
+            box-sizing: border-box;
+        }
+        .global-footer span { font-weight: bold; color: #555; }
+    </style>
+</head>
+<body>
+
+    <div id="welcome-screen" class="screen active">
+        <div class="logo-placeholder">MATM LOQOSU / LOGO</div>
+        <div class="welcome-icon">🏺</div>
+        <div class="welcome-title">Xoş Gəlmisiniz / Welcome</div>
+        <div class="welcome-desc">Dil seçin / Select language</div>
+
+        <div id="ios-prompt" style="display: none; background: #fff3cd; color: #856404; padding: 12px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; border: 1px solid #ffeeba; text-align: left; line-height: 1.5;">
+            📱 <strong>iPhone istifadəçiləri / iPhone users:</strong><br>
+            Daha yaxşı təcrübə üçün aşağıdakı 'Share' (Paylaş) düyməsini sıxaraq <strong>'Add to Home Screen'</strong> (Ana ekrana əlavə et) seçimini edin.<br>
+            <hr style="border: 0; border-top: 1px solid #ffeeba; margin: 8px 0;">
+            For a full-screen experience, tap the 'Share' button below and select <strong>'Add to Home Screen'</strong>.
+        </div>
+
+        <div id="progress-badge-welcome" class="progress-badge" style="display:none;"></div>
+
+        <button id="btn-az" class="btn-lang btn-az" onclick="startApp('az')">🇦🇿 Azərbaycan</button>
+        <button id="btn-en" class="btn-lang btn-en" onclick="startApp('en')">🇬🇧 English</button>
+    </div>
+
+    <div id="player-screen" class="screen">
+        <button id="back-btn" class="back-btn" onclick="goBack()" aria-label="Geri / Back">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        </button>
+        <div class="museum-name" id="ui-museum-name"></div>
+        <div id="progress-badge-player" class="progress-badge"></div>
+        <div id="display-title" class="track-title"></div>
+
+        <div class="photo-placeholder" id="photo-placeholder">
+            <img id="vitrine-photo" src="" alt="" style="width:100%; height:100%; object-fit:cover; border-radius:14px; display:none;">
+            <span id="photo-placeholder-text">🖼️ Vitrinin fotosu/illüstrasiyası üçün yer<br>Photo / illustration placeholder</span>
+        </div>
+
+        <div class="player-wrap">
+            <canvas id="waveform"></canvas>
+            <div class="player-controls">
+                <button id="play-btn" class="play-btn" onclick="togglePlay()" aria-label="Play/Pause">
+                    <svg id="play-icon" viewBox="0 0 24 24" width="30" height="30" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="pause-icon" viewBox="0 0 24 24" width="30" height="30" fill="white" style="display:none;"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                </button>
+                <div class="progress-row">
+                    <span id="time-current" class="time-label">0:00</span>
+                    <div class="progress-track" id="progress-track" onclick="seekAudio(event)">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <span id="time-duration" class="time-label">0:00</span>
+                </div>
+            </div>
+        </div>
+
+        <audio id="main-player" style="display:none;">
+            <source id="audio-source" src="" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+
+        <div class="feedback-box" id="feedback-box" style="display:none;">
+            <div class="feedback-question" id="feedback-question"></div>
+            <div class="feedback-buttons">
+                <button class="feedback-btn" id="feedback-up" onclick="sendFeedback(true)">👍</button>
+                <button class="feedback-btn" id="feedback-down" onclick="sendFeedback(false)">👎</button>
+            </div>
+            <div class="feedback-thanks" id="feedback-thanks"></div>
+        </div>
+
+        <div class="quiz-box" id="quiz-box">
+            <div class="quiz-question" id="quiz-question"></div>
+            <div id="quiz-options"></div>
+        </div>
+
+        <div class="reset-link" id="reset-link" onclick="resetPassport()"></div>
+    </div>
+
+    <div id="error-screen" class="screen">
+        <button id="back-btn-error" class="back-btn" onclick="goBack()" aria-label="Geri / Back">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        </button>
+        <div class="welcome-icon">⚠️</div>
+        <div class="error-box" id="error-text"></div>
+    </div>
+
+    <div class="overlay" id="complete-overlay">
+        <div class="overlay-card">
+            <div class="icon">🎉</div>
+            <h3 id="overlay-title"></h3>
+            <p id="overlay-text"></p>
+            <button class="overlay-close" id="overlay-close" onclick="closeOverlay()"></button>
+        </div>
+    </div>
+
+    <div class="global-footer" id="ui-footer"></div>
+
+    <script>
+        const SHOW_PHOTOS = false; // real vitrin fotoları hazır olanda "true" edin
+
+        window.onload = function() {
+            // Tarixçənin başlanğıc vəziyyəti həmişə "dil seçimi" ekranıdır.
+            // Bu, Android-də geri düyməsi/jesti düzgün işləməsi üçün lazımdır.
+            history.replaceState({ screen: 'welcome' }, '');
+
+            let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            let isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+            let seenIosPrompt = localStorage.getItem('matm_ios_prompt_seen');
+
+            if (isIOS && !isStandalone && !seenIosPrompt) {
+                document.getElementById('ios-prompt').style.display = 'block';
+                localStorage.setItem('matm_ios_prompt_seen', '1');
+            }
+
+            // Cihazın dilini yoxlayıb müvafiq düyməni vizual önə çıxarır (məcburi seçim deyil)
+            const browserLang = (navigator.language || 'az').toLowerCase();
+            if (browserLang.startsWith('en')) {
+                document.getElementById('btn-en').classList.add('suggested');
+            } else {
+                document.getElementById('btn-az').classList.add('suggested');
+            }
+
+            updateWelcomeProgressBadge();
+
+            // Debug rejimi: yalnız ?debug=1 ilə açılanda pasportu sıfırlama linki görünür
+            if (new URLSearchParams(window.location.search).get('debug') === '1') {
+                document.getElementById('reset-link').classList.add('visible');
+            }
+
+            // Service Worker qeydiyyatı (offline dəstək üçün)
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').then(function(reg) {
+                    // Brauzerin sw.js-i öz keşindən deyil, serverdən yenidən yoxlamasını
+                    // məcbur edir — iOS Safari daxil, bəzi brauzerlər sw.js faylını
+                    // özü də uzun müddət keşdə saxlaya bilir.
+                    reg.update();
+                }).catch(function(e){ console.log('SW qeydiyyatı alınmadı', e); });
+            }
+        };
+
+        // ============ VİTRİN VERİLƏNLƏR BAZASI ============
+        // Yeni vitrin əlavə etmək üçün bu siyahıya bir sətir əlavə etmək kifayətdir.
+        // quiz sahəsi hazırda "null" saxlanılıb — kurator tərəfindən konkret sual/cavab
+        // yazılana qədər bilik testi bölməsi həmin vitrində görünməyəcək.
+        const vitrineData = {
+            mustye: {
+                az: { title: "Mustye mədəniyyəti", file: "az_mustye.mp3" },
+                en: { title: "Mousterian culture", file: "en_mustye.mp3" },
+                photo: "mustye.jpg"
+            },
+            quruchay: {
+                az: { title: "Quruçay arxeoloji mədəniyyəti", file: "az_quruchay.mp3" },
+                en: { title: "Guruchay archaeological culture", file: "en_quruchay.mp3" },
+                photo: "quruchay.jpg"
+            },
+        };
+        const TOTAL_VITRINES = Object.keys(vitrineData).length;
+        const PASSPORT_KEY = 'matm_arxeologiya_passport';
+
+        const uiText = {
+            az: {
+                museumName: "Milli Azərbaycan Tarixi Muzeyi — Arxeologiya Zalı",
+                footer: "© Bütün hüquqlar Milli Azərbaycan Tarixi Muzeyinə aiddir.<br><span>Audio bələdçi Beta versiyadadır.</span> Məzmun süni intellekt tərəfindən səsləndirilmişdir.",
+                errorNoParam: "Bu vitrinə aid QR kod düzgün konfiqurasiya edilməyib. Zəhmət olmasa muzey işçisinə müraciət edin.",
+                errorUnknown: "Bu vitrin üçün audio məlumat tapılmadı.",
+                progress: function(n){ return n + " / " + TOTAL_VITRINES + " vitrin kəşf edildi"; },
+                feedbackQ: "Bu bölüm faydalı oldu?",
+                feedbackThanks: "Təşəkkürlər!",
+                overlayTitle: "Təbriklər!",
+                overlayText: "Bu zalın bütün " + TOTAL_VITRINES + " vitrinini kəşf etdiniz.",
+                overlayClose: "Bağla",
+                resetLink: "Pasportu sıfırla"
+            },
+            en: {
+                museumName: "National Museum of History of Azerbaijan — Archaeology Hall",
+                footer: "© All rights reserved to the National Museum of History of Azerbaijan.<br><span>Audio guide is in Beta.</span> Content is voiced by Artificial Intelligence.",
+                errorNoParam: "This display case's QR code is not configured correctly. Please contact museum staff.",
+                errorUnknown: "No audio content was found for this display case.",
+                progress: function(n){ return n + " / " + TOTAL_VITRINES + " periods discovered"; },
+                feedbackQ: "Was this section helpful?",
+                feedbackThanks: "Thank you!",
+                overlayTitle: "Congratulations!",
+                overlayText: "You have discovered all " + TOTAL_VITRINES + " periods of the Archaeology Hall.",
+                overlayClose: "Close",
+                resetLink: "Reset passport"
+            }
+        };
+
+        function getVitrineKey() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('vitrin');
+        }
+
+        function getPassport() {
+            try {
+                return JSON.parse(localStorage.getItem(PASSPORT_KEY)) || [];
+            } catch(e) { return []; }
+        }
+        function savePassport(list) {
+            try { localStorage.setItem(PASSPORT_KEY, JSON.stringify(list)); } catch(e) {}
+        }
+        function markVisited(key) {
+            const list = getPassport();
+            if (list.indexOf(key) === -1) {
+                list.push(key);
+                savePassport(list);
+            }
+            return list.length;
+        }
+        function resetPassport() {
+            localStorage.removeItem(PASSPORT_KEY);
+            location.reload();
+        }
+        function updateWelcomeProgressBadge() {
+            const count = getPassport().length;
+            const badge = document.getElementById('progress-badge-welcome');
+            if (count > 0) {
+                const lang = (navigator.language || 'az').toLowerCase().startsWith('en') ? 'en' : 'az';
+                badge.innerText = uiText[lang].progress(count);
+                badge.style.display = 'inline-block';
+            }
+        }
+
+        const player = document.getElementById('main-player');
+        const source = document.getElementById('audio-source');
+        const titleDisplay = document.getElementById('display-title');
+        const playBtn = document.getElementById('play-btn');
+        const playIcon = document.getElementById('play-icon');
+        const pauseIcon = document.getElementById('pause-icon');
+        const progressFill = document.getElementById('progress-fill');
+        const progressTrack = document.getElementById('progress-track');
+        const timeCurrent = document.getElementById('time-current');
+        const timeDuration = document.getElementById('time-duration');
+        let currentLang = 'az';
+        let currentKey = null;
+        let milestonesFired = {};
+
+        function togglePlay() {
+            if (player.paused) {
+                setupWaveform();
+                if (audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
+                player.play().catch(function(e){ console.log('Play bloklandı', e); });
+            } else {
+                player.pause();
+            }
+        }
+
+        function formatTime(sec) {
+            if (!isFinite(sec) || sec < 0) return '0:00';
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60).toString().padStart(2, '0');
+            return m + ':' + s;
+        }
+
+        function seekAudio(event) {
+            if (!player.duration) return;
+            const rect = progressTrack.getBoundingClientRect();
+            const ratio = (event.clientX - rect.left) / rect.width;
+            player.currentTime = Math.max(0, Math.min(1, ratio)) * player.duration;
+        }
+
+        function startApp(lang) {
+            currentLang = lang;
+            let elem = document.documentElement;
+            let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+            if (!isIOS) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen().catch(e => console.log(e));
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen().catch(e => console.log(e));
+                }
+            }
+
+            document.getElementById('ui-footer').innerHTML = uiText[lang].footer;
+            document.getElementById('overlay-close').innerText = uiText[lang].overlayClose;
+            document.getElementById('reset-link').innerText = uiText[lang].resetLink;
+
+            const key = getVitrineKey();
+            currentKey = key;
+
+            if (!key) {
+                showError(uiText[lang].errorNoParam);
+                return;
+            }
+
+            const vitrine = vitrineData[key];
+            if (!vitrine) {
+                showError(uiText[lang].errorUnknown);
+                return;
+            }
+
+            document.getElementById('ui-museum-name').innerHTML = uiText[lang].museumName;
+            titleDisplay.innerText = vitrine[lang].title;
+            source.src = vitrine[lang].file;
+            player.load();
+
+            playBtn.style.background = lang === 'en' ? 'var(--accent-en)' : 'var(--accent-az)';
+            progressFill.style.width = '0%';
+            timeCurrent.innerText = '0:00';
+            timeDuration.innerText = '0:00';
+            playIcon.style.display = 'block';
+            pauseIcon.style.display = 'none';
+
+            const photoBox = document.getElementById('photo-placeholder');
+            const photoImg = document.getElementById('vitrine-photo');
+            const photoText = document.getElementById('photo-placeholder-text');
+
+            if (SHOW_PHOTOS && vitrine.photo) {
+                photoBox.classList.add('visible');
+                photoImg.src = vitrine.photo;
+                photoImg.style.display = 'block';
+                photoText.style.display = 'none';
+            } else if (SHOW_PHOTOS) {
+                photoBox.classList.add('visible');
+                photoImg.style.display = 'none';
+                photoText.style.display = 'block';
+            } else {
+                photoBox.classList.remove('visible');
+            }
+
+            setupWaveform();
+            if (audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
+            player.play().catch(e => console.log("Avtomatik oxutma bloklandı"));
+
+            // Rəy bölməsini hazırla (audio bitəndə göstəriləcək)
+            document.getElementById('feedback-question').innerText = uiText[lang].feedbackQ;
+            document.getElementById('feedback-thanks').innerText = uiText[lang].feedbackThanks;
+
+            // Bilik testini hazırla (əgər kurator sual əlavə edibsə)
+            setupQuiz(vitrine[lang].quiz, lang);
+
+            // Pleyer ekranına keçərkən tarixçəyə yeni qeyd əlavə edilir ki,
+            // Android-də geri düyməsi/jesti bu qeydi "pop" edə bilsin.
+            history.pushState({ screen: 'player' }, '');
+
+            document.getElementById('welcome-screen').classList.remove('active');
+            document.getElementById('player-screen').classList.add('active');
+
+            if (typeof gtag === 'function') {
+                gtag('event', 'vitrine_audio_start', {
+                    'event_category': 'Audio Guide - Archaeology',
+                    'event_label': key + ' (' + lang + ')'
+                });
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('error-text').innerText = message;
+            history.pushState({ screen: 'error' }, '');
+            document.getElementById('welcome-screen').classList.remove('active');
+            document.getElementById('error-screen').classList.add('active');
+        }
+
+        // ============ GERİ NAVİQASİYASI (Android geri düyməsi/jesti + in-app düymə) ============
+        function exitFullscreenIfActive() {
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(function(e) { console.log(e); });
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
+        }
+
+        // Dil seçimi ekranına qayıdır: fullscreen-dən çıxır, audionu dayandırır,
+        // bütün digər ekranları gizlədir. HƏM in-app "◀ Geri" düyməsi, HƏM DƏ
+        // sistemin geri düyməsi/jesti (popstate) tərəfindən çağırılır.
+        function goToWelcome() {
+            exitFullscreenIfActive();
+            if (player && !player.paused) player.pause();
+            document.getElementById('player-screen').classList.remove('active');
+            document.getElementById('error-screen').classList.remove('active');
+            document.getElementById('welcome-screen').classList.add('active');
+            updateWelcomeProgressBadge();
+        }
+
+        // In-app "◀ Geri" düyməsi: tarixçəni geri sürüşdürür, faktiki keçidi
+        // isə popstate hadisəsi (aşağıda) idarə edir.
+        function goBack() {
+            history.back();
+        }
+
+        // Sistem/brauzer geri düyməsi və ya jesti basılanda işə düşür.
+        // 1-ci basış: player/error -> welcome. 2-ci basış: tarixçədə daha
+        // əvvəlki qeyd olmadığı üçün brauzer normal davranışı ilə
+        // tətbiqi/tabı tərk edir.
+        window.addEventListener('popstate', function(event) {
+            if (event.state && event.state.screen === 'player') {
+                document.getElementById('welcome-screen').classList.remove('active');
+                document.getElementById('error-screen').classList.remove('active');
+                document.getElementById('player-screen').classList.add('active');
+            } else {
+                goToWelcome();
+            }
+        });
+
+        // ============ SƏS DALĞASI (Web Audio API) ============
+        let audioCtx, analyser, sourceNode, waveAnimId;
+        const canvas = document.getElementById('waveform');
+        const canvasCtx = canvas.getContext ? canvas.getContext('2d') : null;
+
+        function setupWaveform() {
+            if (audioCtx) return; // yalnız bir dəfə qurulur
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContextClass();
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 64;
+                sourceNode = audioCtx.createMediaElementSource(player);
+                sourceNode.connect(analyser);
+                analyser.connect(audioCtx.destination); // vacib: səsin eşidilməsi üçün
+            } catch (e) {
+                console.log('Səs dalğası dəstəklənmir, adi pleyer işləyəcək.', e);
+                audioCtx = null;
+            }
+        }
+
+        function drawWaveform() {
+            if (!canvasCtx || !analyser) return;
+            canvas.width = canvas.clientWidth;
+            canvas.height = 60;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function loop() {
+                waveAnimId = requestAnimationFrame(loop);
+                analyser.getByteFrequencyData(dataArray);
+                canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+                const barWidth = (canvas.width / bufferLength) * 1.6;
+                let x = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    const barHeight = (dataArray[i] / 255) * canvas.height;
+                    canvasCtx.fillStyle = '#0056b3';
+                    canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                    x += barWidth + 2;
+                }
+            }
+            loop();
+        }
+
+        player.addEventListener('play', function() {
+            playIcon.style.display = 'none';
+            pauseIcon.style.display = 'block';
+            if (analyser) {
+                canvas.classList.add('visible');
+                drawWaveform();
+            }
+        });
+        player.addEventListener('pause', function() {
+            playIcon.style.display = 'block';
+            pauseIcon.style.display = 'none';
+            if (waveAnimId) cancelAnimationFrame(waveAnimId);
+            canvas.classList.remove('visible');
+        });
+        player.addEventListener('loadedmetadata', function() {
+            timeDuration.innerText = formatTime(player.duration);
+        });
+        player.addEventListener('ended', function() {
+            playIcon.style.display = 'block';
+            pauseIcon.style.display = 'none';
+            canvas.classList.remove('visible');
+        });
+
+        // ============ GA4: TAMAMLANMA FAİZİ ============
+        player.addEventListener('timeupdate', function() {
+            if (player.duration) {
+                progressFill.style.width = ((player.currentTime / player.duration) * 100) + '%';
+                timeCurrent.innerText = formatTime(player.currentTime);
+            }
+            if (!player.duration || !currentKey) return;
+            const pct = Math.floor((player.currentTime / player.duration) * 100);
+            [25, 50, 75, 100].forEach(function(threshold) {
+                const flagKey = currentKey + '_' + threshold;
+                if (pct >= threshold && !milestonesFired[flagKey]) {
+                    milestonesFired[flagKey] = true;
+                    if (typeof gtag === 'function') {
+                        gtag('event', 'audio_progress', {
+                            'event_category': 'Audio Guide - Archaeology',
+                            'event_label': currentKey + ' (' + currentLang + ') - ' + threshold + '%'
+                        });
+                    }
+                }
+            });
+        });
+
+        // ============ AUDIO BİTDİKDƏ: PASPORT + RƏY + TEST ============
+        player.addEventListener('ended', function() {
+            if (!currentKey) return;
+
+            const visitedCount = markVisited(currentKey);
+            const badge = document.getElementById('progress-badge-player');
+            badge.innerText = uiText[currentLang].progress(visitedCount);
+
+            document.getElementById('feedback-box').style.display = 'block';
+
+            if (visitedCount >= TOTAL_VITRINES) {
+                showCompleteOverlay();
+            }
+        });
+
+        function showCompleteOverlay() {
+            document.getElementById('overlay-title').innerText = uiText[currentLang].overlayTitle;
+            document.getElementById('overlay-text').innerText = uiText[currentLang].overlayText;
+            document.getElementById('complete-overlay').classList.add('active');
+        }
+        function closeOverlay() {
+            document.getElementById('complete-overlay').classList.remove('active');
+        }
+
+        // ============ RƏY (👍 / 👎) ============
+        function sendFeedback(positive) {
+            document.getElementById('feedback-up').classList.toggle('selected', positive);
+            document.getElementById('feedback-down').classList.toggle('selected', !positive);
+            document.getElementById('feedback-thanks').style.display = 'block';
+            document.getElementById('feedback-up').disabled = true;
+            document.getElementById('feedback-down').disabled = true;
+
+            if (typeof gtag === 'function') {
+                gtag('event', 'vitrine_feedback', {
+                    'event_category': 'Audio Guide - Archaeology',
+                    'event_label': currentKey + ' (' + currentLang + ')',
+                    'value': positive ? 1 : 0
+                });
+            }
+        }
+
+        // ============ BİLİK TESTİ (kurator sual əlavə edəndə aktivləşir) ============
+        function setupQuiz(quiz, lang) {
+            const box = document.getElementById('quiz-box');
+            if (!quiz) {
+                box.style.display = 'none';
+                return;
+            }
+            document.getElementById('quiz-question').innerText = quiz.question;
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            quiz.options.forEach(function(optionText, index) {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-option';
+                btn.innerText = optionText;
+                btn.onclick = function() {
+                    const allOptions = optionsContainer.querySelectorAll('.quiz-option');
+                    allOptions.forEach(function(o){ o.disabled = true; });
+                    if (index === quiz.correctIndex) {
+                        btn.classList.add('correct');
+                    } else {
+                        btn.classList.add('wrong');
+                        allOptions[quiz.correctIndex].classList.add('correct');
+                    }
+                    if (typeof gtag === 'function') {
+                        gtag('event', 'vitrine_quiz_answer', {
+                            'event_category': 'Audio Guide - Archaeology',
+                            'event_label': currentKey + ' (' + lang + ')',
+                            'value': index === quiz.correctIndex ? 1 : 0
+                        });
+                    }
+                };
+                optionsContainer.appendChild(btn);
+            });
+            box.style.display = 'block';
+        }
+    </script>
+
+</body>
+</html>
