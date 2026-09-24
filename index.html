@@ -30,6 +30,7 @@
             --accent-az: #0056b3;
             --accent-en: #b30000;
             --accent-tr: #e30a17;
+            --accent-ru: #1b7f5c;
         }
 
         body {
@@ -134,6 +135,7 @@
         .btn-az { background: var(--accent-az); }
         .btn-en { background: var(--accent-en); }
         .btn-tr { background: var(--accent-tr); }
+        .btn-ru { background: var(--accent-ru); }
         .btn-lang.suggested {
             transform: scale(1.03);
             box-shadow: 0 0 0 3px rgba(0,86,179,0.25);
@@ -357,15 +359,17 @@
 
     <div id="welcome-screen" class="screen active">
         <img src="logo.png" alt="MATM" style="max-width:50px; height:auto; margin:0 auto 18px auto; display:block;">
-        <div class="welcome-title">Xoş Gəlmisiniz / Welcome</div>
+        <div class="welcome-title">Xoş Gəlmisiniz / Welcome / Добро пожаловать</div>
         <div class="welcome-icon">🏺</div>
-        <div class="welcome-desc">Dil seçin / Select language</div>
+        <div class="welcome-desc">Dil seçin / Select language / Выберите язык</div>
 
         <div id="ios-prompt" style="display: none; background: #fff3cd; color: #856404; padding: 12px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; border: 1px solid #ffeeba; text-align: left; line-height: 1.5;">
-            📱 <strong>iPhone istifadəçiləri / iPhone users:</strong><br>
+            📱 <strong>iPhone istifadəçiləri / iPhone users / Пользователи iPhone:</strong><br>
             Daha yaxşı təcrübə üçün aşağıdakı 'Share' (Paylaş) düyməsini sıxaraq <strong>'Add to Home Screen'</strong> (Ana ekrana əlavə et) seçimini edin.<br>
             <hr style="border: 0; border-top: 1px solid #ffeeba; margin: 8px 0;">
             For a full-screen experience, tap the 'Share' button below and select <strong>'Add to Home Screen'</strong>.
+            <hr style="border: 0; border-top: 1px solid #ffeeba; margin: 8px 0;">
+            Для удобной работы нажмите кнопку «Поделиться» внизу и выберите <strong>«На экран “Домой”»</strong>.
         </div>
 
         <div id="progress-badge-welcome" class="progress-badge" style="display:none;"></div>
@@ -374,6 +378,7 @@
             <button id="btn-az" class="btn-lang btn-az" onclick="startApp('az')">🇦🇿 Azərbaycan</button>
             <button id="btn-tr" class="btn-lang btn-tr" onclick="startApp('tr')">🇹🇷 Türkçe</button>
             <button id="btn-en" class="btn-lang btn-en" onclick="startApp('en')">🇬🇧 English</button>
+            <button id="btn-ru" class="btn-lang btn-ru" onclick="startApp('ru')">🇷🇺 Русский</button>
         </div>
 
     </div>
@@ -385,7 +390,7 @@
 
         <div class="photo-placeholder" id="photo-placeholder">
             <img id="vitrine-photo" src="" alt="" style="width:100%; height:100%; object-fit:cover; border-radius:14px; display:none;">
-            <span id="photo-placeholder-text">🖼️ Vitrinin fotosu/illüstrasiyası üçün yer<br>Photo / illustration placeholder</span>
+            <span id="photo-placeholder-text">🖼️ Vitrinin fotosu/illüstrasiyası üçün yer<br>Photo / illustration placeholder<br>Место для фото / иллюстрации витрины</span>
         </div>
 
         <div class="selector-container">
@@ -453,6 +458,16 @@
     </div>
 
     <script>
+        const SUPPORTED_LANGS = ['az', 'en', 'tr', 'ru'];
+        const LANG_COLORS = { az: 'var(--accent-az)', en: 'var(--accent-en)', tr: 'var(--accent-tr)', ru: 'var(--accent-ru)' };
+        const LANG_NAMES = { az: 'Azerbaijani', en: 'English', tr: 'Turkish', ru: 'Russian' };
+
+        // Brauzerin dilinə görə ilkin dil təklifi (dəstəklənməyən dil -> az)
+        function detectLang() {
+            const code = (navigator.language || 'az').toLowerCase().slice(0, 2);
+            return SUPPORTED_LANGS.indexOf(code) !== -1 ? code : 'az';
+        }
+
         const SHOW_PHOTOS = false; // real vitrin fotoları hazır olanda "true" edin
 
         window.onload = function() {
@@ -469,14 +484,7 @@
                 localStorage.setItem('matm_ios_prompt_seen', '1');
             }
 
-            const browserLang = (navigator.language || 'az').toLowerCase();
-            if (browserLang.startsWith('en')) {
-                document.getElementById('btn-en').classList.add('suggested');
-            } else if (browserLang.startsWith('tr')) {
-                document.getElementById('btn-tr').classList.add('suggested');
-            } else {
-                document.getElementById('btn-az').classList.add('suggested');
-            }
+            document.getElementById('btn-' + detectLang()).classList.add('suggested');
 
             updateWelcomeProgressBadge();
 
@@ -505,26 +513,30 @@
               az: { title: "Quruçay arxeoloji mədəniyyəti", file: "az_quruchay_kartal.mp3" },
               en: { title: "Guruchay archaeological culture", file: "en_quruchay_female.mp3" },
               tr: { title: "Guruçay arkeolojik kültürü", file: "tr_quruchay.mp3" },
+              ru: { title: "Гуручайская археологическая культура", file: "ru_quruchay.mp3" },
               photo: "quruchay.jpg",
-              quiz: { az: null, en: null, tr: null } },
+              quiz: { az: null, en: null, tr: null, ru: null } },
             { id: 'mustye', order: 2,
               az: { title: "Mustye mədəniyyəti", file: "az_mustye_kartal.mp3" },
               en: { title: "Mousterian culture", file: "en_mustye_sarah.mp3" },
               tr: { title: "Musteryen kültürü", file: "tr_mustye_murat.mp3" },
+              ru: { title: "Мустьерская культура", file: "ru_mustye.mp3" },
               photo: "mustye.jpg",
-              quiz: { az: null, en: null, tr: null } },
+              quiz: { az: null, en: null, tr: null, ru: null } },
             { id: 'men_med', order: 3,
               az: { title: "Daş (Neolitə qədərki) dövrünün mənəvi mədəniyyəti", file: "az_men_med_kartal.mp3" },
               en: { title: "Spiritual Culture of the Stone Age (Pre-Neolithic Period)", file: "en_men_med_sarah.mp3" },
               tr: { title: "Taş Devri'nin (Neolitik öncesi dönem) manevi kültürü", file: "tr_men_med_murat.mp3" },
+              ru: { title: "Духовная культура каменного века (доненеолитический период)", file: "ru_men_med.mp3" },
               photo: null,
-              quiz: { az: null, en: null, tr: null } },
+              quiz: { az: null, en: null, tr: null, ru: null } },
             { id: 'qobustan', order: 4,
               az: { title: "Qobustan mədəniyyəti", file: "az_qobustan_kartal.mp3" },
               en: { title: "Gobustan Culture", file: "en_qobustan_sarah.mp3" },
               tr: { title: "Gobustan Kültürü", file: "tr_qobustan_murat.mp3" },
+              ru: { title: "Гобустанская культура", file: "ru_qobustan.mp3" },
               photo: null,
-              quiz: { az: null, en: null, tr: null } },
+              quiz: { az: null, en: null, tr: null, ru: null } },
           
         ];
         const TOTAL_VITRINES = roomsList.length;
@@ -569,6 +581,19 @@
                 overlayText: "Bu salonun tüm " + TOTAL_VITRINES + " konusunu keşfettiniz.",
                 overlayClose: "Kapat",
                 resetLink: "Pasaportu sıfırla"
+            },
+            ru: {
+                museumName: "Зал археологии",
+                selectLabel: "Выберите тему:",
+                backLabel: "Назад",
+                footer: "© Все права принадлежат Национальному музею истории Азербайджана.<br><span>Аудиогид находится в бета-версии.</span> Контент озвучен искусственным интеллектом.",
+                progress: function(n){ return "Открыто тем: " + n + " из " + TOTAL_VITRINES; },
+                feedbackQ: "Был ли этот раздел полезен?",
+                feedbackThanks: "Спасибо!",
+                overlayTitle: "Поздравляем!",
+                overlayText: "Вы открыли все темы этого зала (" + TOTAL_VITRINES + ").",
+                overlayClose: "Закрыть",
+                resetLink: "Сбросить паспорт"
             }
         };
 
@@ -594,8 +619,7 @@
             const count = getPassport().length;
             const badge = document.getElementById('progress-badge-welcome');
             if (count > 0) {
-                const browserLang = (navigator.language || 'az').toLowerCase();
-                const lang = browserLang.startsWith('en') ? 'en' : (browserLang.startsWith('tr') ? 'tr' : 'az');
+                const lang = detectLang();
                 badge.innerText = uiText[lang].progress(count);
                 badge.style.display = 'inline-block';
             }
@@ -642,6 +666,7 @@
 
         function startApp(lang) {
             currentLang = lang;
+            document.documentElement.lang = lang;
             let elem = document.documentElement;
             let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
@@ -680,7 +705,7 @@
             if (typeof gtag === 'function') {
                 gtag('event', 'language_selected', {
                     'event_category': 'Audio Guide - Archaeology',
-                    'event_label': lang === 'az' ? 'Azerbaijani' : (lang === 'tr' ? 'Turkish' : 'English')
+                    'event_label': LANG_NAMES[lang]
                 });
             }
         }
@@ -737,7 +762,7 @@
             titleDisplay.innerText = room[currentLang].title;
             player.load();
 
-            playBtn.style.background = currentLang === 'en' ? 'var(--accent-en)' : (currentLang === 'tr' ? 'var(--accent-tr)' : 'var(--accent-az)');
+            playBtn.style.background = LANG_COLORS[currentLang];
             progressFill.style.width = '0%';
             timeCurrent.innerText = '0:00';
             timeDuration.innerText = '0:00';
