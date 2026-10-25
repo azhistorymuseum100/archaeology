@@ -654,6 +654,7 @@
         let currentLang = 'az';
         let currentKey = null;
         let milestonesFired = {};
+        let completionsFired = {};
 
         function togglePlay() {
             if (player.paused) {
@@ -898,9 +899,13 @@
                 showCompleteOverlay();
             }
 
-            // Tələb 5: GA4 izləməsi - Audio bitdikdə tam dil adı ilə hadisə göndərilir
+            // Tələb 5: GA4 izləməsi - Audio sona qədər dinləniləndə hadisə göndərilir.
+            // V3: hadisənin adı audio_play -> audio_complete olaraq dəyişdirildi.
+            // Təkrar dinləmə sayılmır: hər vitrin üçün səhifə yenilənənə qədər yalnız bir dəfə göndərilir.
+            if (completionsFired[currentKey]) return;
+            completionsFired[currentKey] = true;
             if (typeof gtag === 'function') {
-                gtag('event', 'audio_play', {
+                gtag('event', 'audio_complete', {
                     'event_category': 'Audio Guide - Archaeology',
                     'event_label': currentKey + ' (' + getFullLangName(currentLang) + ')'
                 });
