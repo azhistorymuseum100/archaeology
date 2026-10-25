@@ -8,13 +8,11 @@
 // yarıda ilişə və ya heç açılmaya bilər — xüsusən köhnə Android brauzerlərində.
 // Ona görə audio faylları tamamilə bu SW-nin nəzarətindən kənarda saxlanılır.
 
-const CACHE_NAME = 'matm-arxeologiya-v4';
+const CACHE_NAME = 'matm-arxeologiya-v5'; // versiya artırıldı: shell faylı vitrin.html-ə uyğunlaşdırıldı
 const SHELL_FILES = [
   'index.html',
   'vitrin.html',
-  'manifest.json',
-  'icon-192.png',
-  'icon-512.png'
+  'manifest.json'
 ];
 
 const NETWORK_TIMEOUT_MS = 4000;
